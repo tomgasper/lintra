@@ -2,16 +2,6 @@
 // Please note that those are naive and unoptimized implementations as the code
 // was created for educational purposes
 
-export function IdentityMatrix()
-{
-    return [
-        [1,0,0,0],
-        [0,1,0,0],
-        [0,0,1,0],
-        [0,0,0,1],
-    ]
-}
-
 export function MyCreateMatrixTransformation(t,r,s)
 {
     if (t == null || r == null || s == null) throw new Error("Input is null");

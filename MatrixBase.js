@@ -3,26 +3,27 @@ export default class MatrixBase {
         this.folder = null;
         this.id = id;
         this.name = "";
-        this.prefix = "";
+        this.prefix = '';
 
         switch (this.id)
         {
             case 0 :
                 this.name = "World";
-                this.prefix = "w";
+                this.prefix = 'w';
                 break;
             case 1 :
                 this.name = "View";
-                this.prefix = "v";
+                this.prefix = 'v';
                 break;
             case 2 :
                 this.name = "Projection";
-                this.prefix = "p";
+                this.prefix = 'p';
                 break;
             default:
                 throw new Error("Wrong input name!");
         }
 
+        // Initialize folder with provided string
         this.folder = ctrl_ref._pane.addFolder({
             title: `${this.name} Matrix`
             });
@@ -31,7 +32,10 @@ export default class MatrixBase {
             multiline: true,
             lineCount: 5,
             });
-    
+
+        // Parameters for World and View Matrix Windows
+        if (this.prefix != 'p')
+        {
             this.folder.addInput(ctrl_ref.state.INPUT, `${this.prefix}_rotate_X`, {
                 min: -180,
                 max: 180,
@@ -52,8 +56,24 @@ export default class MatrixBase {
     
             this.folder.addInput(ctrl_ref.state.INPUT, `${this.prefix}_translate`, {
             });
+        }
+        // Parameters for Projection Matrix Windows
+        else
+        {
+            this.folder.addInput(ctrl_ref.state.SCREEN_INFO, 'far_plane', {
+                min: 0,
+                max: 100,
+            });
 
-            return this.folder
-            ;
+            this.folder.addInput(ctrl_ref.state.SCREEN_INFO, 'near_plane', {
+                min: 0,
+                max: 10,
+            });
+
+            this.folder.addInput(ctrl_ref.state.INPUT, 'viewApply');
+        }
+
+        return this.folder
+        ;
     }
 }

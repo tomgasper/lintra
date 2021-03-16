@@ -2,7 +2,7 @@ import { MyMultiplyMatrix4x4,
     MyCreateMatrixTransformation,
     MyTransposeMatrix,
     MyProjectionMatrix
-} from "./myMath.js";
+} from "./utilities/myMath.js";
 
 
 export default class State {
@@ -19,12 +19,6 @@ export default class State {
             v_rotate_X: 0.0,
             v_rotate_Y: 0.0,
             v_rotate_Z: 0.0,
-
-            p_scale: {x: 1, y: 1, z: 1},
-            p_translate: {x: 0, y: 0, z: 0},
-            p_rotate_X: 0.0,
-            p_rotate_Y: 0.0,
-            p_rotate_Z: 0.0,
 
             viewApply: false,
 

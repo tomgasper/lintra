@@ -8,14 +8,14 @@ import Grid from "./assets/Grid.js";
 
 import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
 
-import State from "./state.js";
+import State from "./State.js";
 
 import UI_Ctrl from "./UI.js"
 
-import { ParseMatrix } from "./utilities.js";
+import { ParseMatrix } from "./utilities/utilities.js";
 import { MyMultiplyMatrix4x4,
          MyCreateMatrixTransformation,
-         MyTransposeMatrix } from "./myMath.js";
+         MyTransposeMatrix } from "./utilities/myMath.js";
 
 // INIT State object
 const state = new State();
@@ -38,42 +38,35 @@ container.appendChild( renderer.domElement );
 const UI_Controller = new UI_Ctrl(state);
 
 // INIT Scene elements
-
-const cube = new Cube("#3a49f2",2).model;
-const cube2 = new Cube("#3a49f2",2).model;
-const cube3 = new Cube("#3a49f2",2).model;
-
 const grid = new Grid("#808080").model;
 
-const myCube = scene.add( cube );
-const myCube2 = scene.add( cube2 );
-const myCube3 = scene.add( cube3 );
+function InitializeCube(color, size, t = { x: 0, y: 0, z : 0}, autoUpdate = true)
+{
+    if (color == null || size == null || typeof color != "string" ) throw new Error("Invalid input!");
 
-const cube2_m = new THREE.Matrix4();
+    const cube = new Cube(color,size).model;
+    scene.add( cube );
 
-cube2_m.set(
-    1,0,0,4,
-    0,1,0,0,
-    0,0,1,-4,
-    0,0,0,1
-);
+    const m = new THREE.Matrix4();
+    m.set(
+        1 ,0, 0, t.x,
+        0, 1, 0 ,t.y,
+        0, 0 ,1, t.z,
+        0, 0, 0,  1
+    );
 
-cube2.matrixAutoUpdate = false;
+    if (autoUpdate === false)
+    {
+        cube.matrixAutoUpdate = false;
+    }
 
-cube2.matrix = cube2_m;
+    // returning reference to the new object
+    return cube;
+}
 
-const cube3_m = new THREE.Matrix4();
-
-cube3_m.set(
-    1,0,0,-4,
-    0,1,0,0,
-    0,0,1,-4,
-    0,0,0,1
-)
-
-cube3.matrixAutoUpdate = false;
-
-cube.matrixAutoUpdate = false;
+let cube = InitializeCube("#3a49f2",2, { x:2, y:0, z:0}, false );
+let cube2 = InitializeCube("#3a49f2",2);
+let cube3 = InitializeCube("#3a49f2",2);
 
 const myGrid = scene.add( grid );
 
@@ -125,11 +118,6 @@ function render(time) {
     time *= 0.001;  // convert time to seconds
 
     requestAnimationFrame(render);
-
-    if (myCube != null)
-    {
-        // cube.position.x = time;
-    }
 
     if (UI_Controller != null)
     {
@@ -188,13 +176,8 @@ function Frame(time)
                  }
                  else
                  {
-                    
                     grid.position.set(0,0,0);
-
                     let m3 = new THREE.Matrix4();
-
-                    
-
                     m3 = m3.multiplyMatrices(view_matrix,world_matrix);
 
                     cube.matrix = m3;
