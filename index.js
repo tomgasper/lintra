@@ -1,118 +1,56 @@
 import * as T from "./lib/three.js";
-import { DragControls } from "./lib/DragControls.js"; 
-import { OBJLoader } from "./lib/OBJLoader.js";
-import { Vector3,Mesh } from "./lib/three.module.js";
-
 import Cube from "./assets/Cube.js";
 import Grid from "./assets/Grid.js";
 
 import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
 
 import State from "./State.js";
+import UI_Ctrl from "./ui/UI_Window.js"
+import { LoadModel } from "./utilities/utilities.js";
+import { Frame, IsReadyToRender } from "./frame.js";
 
-import UI_Ctrl from "./UI.js"
-
-import { ParseMatrix } from "./utilities/utilities.js";
-import { MyMultiplyMatrix4x4,
-         MyCreateMatrixTransformation,
-         MyTransposeMatrix } from "./utilities/myMath.js";
-
-// INIT State object
+// INIT object that is going to hold app's (simple) state
 const state = new State();
 
 // INIT THREE.js Scene
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000);
-const loader = new OBJLoader();
+camera.position.set(3,3,-5);
 const light = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1.5 );
 light.position.set(3,4,1);
 scene.add( light );
 
-// INIT THREE.js render
+// INIT THREE.js Renderer
 const renderer = new THREE.WebGLRenderer();
 const container = document.getElementById("canvas");
 renderer.setSize( window.innerWidth, window.innerHeight );
 container.appendChild( renderer.domElement );
 
-// INIT UI Controller
-const UI_Controller = new UI_Ctrl(state);
-
-// INIT Scene elements
-const grid = new Grid("#808080").model;
-
-function InitializeCube(color, size, t = { x: 0, y: 0, z : 0}, autoUpdate = true)
-{
-    if (color == null || size == null || typeof color != "string" ) throw new Error("Invalid input!");
-
-    const cube = new Cube(color,size).model;
-    scene.add( cube );
-
-    const m = new THREE.Matrix4();
-    m.set(
-        1 ,0, 0, t.x,
-        0, 1, 0 ,t.y,
-        0, 0 ,1, t.z,
-        0, 0, 0,  1
-    );
-
-    if (autoUpdate === false)
-    {
-        cube.matrixAutoUpdate = false;
-    }
-
-    // returning reference to the new object
-    return cube;
-}
-
-let cube = InitializeCube("#3a49f2",2, { x:2, y:0, z:0}, false );
-let cube2 = InitializeCube("#3a49f2",2);
-let cube3 = InitializeCube("#3a49f2",2);
-
-const myGrid = scene.add( grid );
-
-const axesHelper = new THREE.AxesHelper( 5 );
-scene.add( axesHelper );
-
-
-// INIT Camera settings
-camera.position.set(3,3,-5);
-
-
-
-// INIT Controllers
+// INIT Orbit Controller
 const orbitControls = new OrbitControls( camera, renderer.domElement );
 
-//
-// Hard coded load 
-function LoadModel(name){
-    if (name != null){
-        loader.load(
-            `assets/${name}.obj`, (obj) =>{
-                var mat = new THREE.MeshPhongMaterial( {wireframe:true, wireframeLinecap: "round", color: 0xffffff} );
+// INIT UI Panel
+const UI_Controller = new UI_Ctrl(state);
 
-                const edges = new THREE.EdgesGeometry( obj.children[0].geometry );
-
-                const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
-        
-                obj.children[0].material = mat;
-        
-                scene.add(line);
-
-                line.lookAt(0,0,-1);
-                line.position.set(0,0,-0);
-                edges.scale(2.5,2,2);
-            },
-            (xhr) => {
-                console.log( (xhr.loaded/ xhr.total * 100))
-            },
-            (err) => {
-                console.log("Loader.load Error: " + err);
-            }
-        );
-    }
+// INIT reference holder for models that are going to be loaded
+var _model_ref = {
+    camera: null,
+    grid: null,
+    cube: null,
+    axesHelper: null,
 }
 
-let icon = LoadModel("camera");
+// INIT Scene elements
+_model_ref.grid = new Grid("#808080").AddToScene(scene);
+_model_ref.cube = new Cube("#3a49f2",2).AddToScene(scene);
+
+// _model_ref.cube2 = new Cube("#3a49f2",2).AddToScene(scene);
+
+_model_ref.axesHelper = new THREE.AxesHelper( 5 );
+scene.add( _model_ref.axesHelper );
+
+// Load external 3d object pass in ref to object holder
+LoadModel("camera", scene, _model_ref);
 
 function render(time) {
     time *= 0.001;  // convert time to seconds
@@ -121,87 +59,14 @@ function render(time) {
 
     if (UI_Controller != null)
     {
-        if (cube != null)
+        if ( IsReadyToRender(_model_ref) === true )
         {
-            Frame(time);
+            Frame(state, camera, _model_ref);
         }
         
     }
     
     renderer.render(scene, camera);
-}
-
-function Frame(time)
-{
-    if (state.INPUT != null)
-            {
-                let m_output = new THREE.Matrix4();
-                const world_matrix = state.TryGetMatrix("w");
-                const view_matrix = state.TryGetMatrix("v");
-                
-                const projection_matrix = state.GetProjectionMatrix(state.INPUT.p_progress);
-
-                m_output = m_output.multiplyMatrices(view_matrix,world_matrix);
-                m_output = m_output.multiplyMatrices(projection_matrix, m_output);
-
-                
-
-                const transpose_w_matrix = MyTransposeMatrix(world_matrix.elements, true);
-                const transpose_v_matrix = MyTransposeMatrix(view_matrix.elements, true);
-                const transpose_p_matrix = MyTransposeMatrix(projection_matrix.elements, true);
-
-                UpdateMonitorMatrixData(transpose_w_matrix, transpose_v_matrix,transpose_p_matrix);
-
-                 if (state.INPUT.viewApply == true)
-                 {
-                    cube2.matrixAutoUpdate = false;
-                    cube3.matrixAutoUpdate = false;
-
-                    let m = new THREE.Matrix4();
-
-                    m = m.multiplyMatrices(view_matrix,cube2_m);
-                    m = m.multiplyMatrices(projection_matrix,m);
-
-                    let m2 = new THREE.Matrix4();
-
-                    m2 = m2.multiplyMatrices(view_matrix,cube3_m);
-                    m2 = m2.multiplyMatrices(projection_matrix,m2);
-
-                    cube2.matrix = m;
-                    cube3.matrix = m2;
-
-                    cube.matrix = m_output;
-
-                     
-                 }
-                 else
-                 {
-                    grid.position.set(0,0,0);
-                    let m3 = new THREE.Matrix4();
-                    m3 = m3.multiplyMatrices(view_matrix,world_matrix);
-
-                    cube.matrix = m3;
-                    cube2.matrix = cube2_m;
-                    cube3.matrix = cube3_m;
-                    camera.matrixAutoUpdate = true;
-                    grid.matrixAutoUpdate = true; 
-                 }
-
-                 // applying both WORLD and VIEW matrix to cube matrix
-                 
-            }
-}
-
-function UpdateMonitorMatrixData(m1,m2,m3)
-{
-    const str_worldMatrix = ParseMatrix(m1);
-    state.PARAMS.w_matrix = str_worldMatrix;
-
-    const str_viewMatrix = ParseMatrix(m2);
-    state.PARAMS.v_matrix = str_viewMatrix;
-
-    const str_projectionMatrix = ParseMatrix(m3);
-    state.PARAMS.p_matrix = str_projectionMatrix;
 }
 
 requestAnimationFrame(render);

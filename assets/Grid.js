@@ -30,11 +30,6 @@ export default class MyGrid {
                 this.offset*i-this.width/2,0, -this.height/2,
             )
         }
-
-        // for (const v of this.vertices)
-        // {
-        //     this.positions.push(...v.pos);
-        // }
         
         this.geo = new THREE.BufferGeometry();
         this.positionNumComponents = 3;
@@ -46,5 +41,14 @@ export default class MyGrid {
         
         this.material = new THREE.LineBasicMaterial( { color: this.color });
         this.model = new THREE.LineSegments(this.geo, this.material);
+    }
+
+    AddToScene(scene)
+    {
+        if(scene == null) throw new Error("Error: Scene is null!");
+
+        scene.add(this.model);
+
+        return this.model;
     }
 }

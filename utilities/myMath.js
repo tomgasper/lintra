@@ -1,6 +1,11 @@
 // Utility functions that help with matrix operations, specific calculations etc.
-// Please note that those are naive and unoptimized implementations as the code
-// was created for educational purposes
+// Please note that these are naive and unoptimized implementations as the code
+// was created for educational purposes only
+
+export function MyTranslateTransformation(x,y,z)
+{
+    return 
+}
 
 export function MyCreateMatrixTransformation(t,r,s)
 {
@@ -60,23 +65,12 @@ export function MyProjectionMatrix(left,right, top, bottom, near_plane, far_plan
     const x = 2 * near_plane / (right - left); // projected x onto the projection surface
     const y = 2 * near_plane / (top - bottom); // projected y onto the projection surface
 
-
     // map projected x to NDC x so from [l,r] to [-1,1]
     // map projected y to NDC so y from [b,t] to [-1,1]
-
-    
     const a = (right + left) / (right - left);
     const b = (top + bottom) / (top - bottom); 
     const c = -(far_plane + near_plane) / (far_plane - near_plane);
     const d = -2 * far_plane * near_plane / (far_plane - near_plane);
-    
-
-    // let m = [
-    //     [x, 0, a, 0],
-    //     [0, y, b, 0],
-    //     [0, 0, c,  d],
-    //     [0, 0, -1, 0] // this row only sets the z component of the clip coord as original (-)z
-    // ]
 
     let m = [];
     m[0] = x;

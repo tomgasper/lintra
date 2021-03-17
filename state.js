@@ -4,12 +4,13 @@ import { MyMultiplyMatrix4x4,
     MyProjectionMatrix
 } from "./utilities/myMath.js";
 
+import { ParseMatrix } from "./utilities/utilities.js";
 
 export default class State {
     constructor() {
         this.INPUT = {
             w_scale: {x: 1, y: 1, z: 1},
-            w_translate: {x: 0, y: 0, z: 0},
+            w_translate: {x: 0, y: 0, z: -5},
             w_rotate_X: 0.0,
             w_rotate_Y: 0.0,
             w_rotate_Z: 0.0,
@@ -20,9 +21,7 @@ export default class State {
             v_rotate_Y: 0.0,
             v_rotate_Z: 0.0,
 
-            viewApply: false,
-
-            p_progress: 100
+            projection: false,
         }
 
         this.SCREEN_INFO = {
@@ -39,8 +38,6 @@ export default class State {
             v_matrix: "",
             p_matrix: ""
         }
-
-
     }
 
     TryGetMatrix(prefix)
@@ -74,15 +71,21 @@ export default class State {
 
         // convert from my matrix format to three js matrix
         const THREE_m = new THREE.Matrix4();
-        // THREE_m.set(
-        //             m[0][0], m[0][1], m[0][2], m[0][3],
-        //             m[1][0], m[1][1], m[1][2], m[1][3],
-        //             m[2][0], m[2][1], m[2][2], m[2][3],
-        //             m[3][0], m[3][1], m[3][2], m[3][3],
-        // )
 
         THREE_m.fromArray(m);
 
         return THREE_m;
+    }
+
+    UpdateMonitorMatrixData(m1,m2,m3)
+    {
+    const str_worldMatrix = ParseMatrix(m1);
+    this.PARAMS.w_matrix = str_worldMatrix;
+
+    const str_viewMatrix = ParseMatrix(m2);
+    this.PARAMS.v_matrix = str_viewMatrix;
+
+    const str_projectionMatrix = ParseMatrix(m3);
+    this.PARAMS.p_matrix = str_projectionMatrix;
     }
 }

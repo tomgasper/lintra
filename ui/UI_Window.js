@@ -1,4 +1,4 @@
-import MatrixBase from "./MatrixBase.js";
+import MatrixBase from "./UI_MatrixBaseFolder.js";
 
 export default class UI_Ctrl {
 

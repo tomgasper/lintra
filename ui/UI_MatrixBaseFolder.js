@@ -70,7 +70,7 @@ export default class MatrixBase {
                 max: 10,
             });
 
-            this.folder.addInput(ctrl_ref.state.INPUT, 'viewApply');
+            this.folder.addInput(ctrl_ref.state.INPUT, 'projection');
         }
 
         return this.folder
