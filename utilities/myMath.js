@@ -20,9 +20,9 @@ export function MyCreateMatrixTransformation(t,r,s)
     ];
 
     // convert degrees to radians
-    const rad_a = r.x * Math.PI/180;
+    const rad_a = r.z * Math.PI/180;
     const rad_b = r.y * Math.PI/180;
-    const rad_y = r.z * Math.PI/180;
+    const rad_y = r.x * Math.PI/180;
 
     // find cosinus and sinus of input values
     const cos_a = Math.cos(rad_a);
@@ -137,7 +137,7 @@ export function MyTransposeMatrix(m, isSimpleArr = false)
         for (let i = 0; i < m.length; i++)
             {
                 temp_arr = [
-                    m[0], m[3],m[7], m[11],
+                    m[0], m[4],m[8], m[12],
                     m[1], m[5], m[9], m[13],
                     m[2], m[6], m[10], m[14],
                     m[3], m[7], m[11], m[15]
